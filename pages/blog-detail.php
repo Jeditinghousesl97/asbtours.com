@@ -301,13 +301,10 @@ $seoImage = $cfg('seo_image', '') ?: ($cfg('site_logo', '') ?: 'assets/images/lo
                         <?php if (!$useStatic && !empty($postGallery)): ?>
                         <div class="article-gallery-wrap">
                             <h3 style="margin-top:2rem;">Photo Gallery</h3>
-                            <div class="row g-3">
+                            <div class="article-gallery-masonry">
                                 <?php foreach ($postGallery as $galleryImage): ?>
-                                <div class="col-6 col-md-4">
-                                    <a href="<?= htmlspecialchars($galleryImage) ?>" target="_blank" rel="noopener">
-                                        <img src="<?= htmlspecialchars($galleryImage) ?>" alt="Blog gallery image"
-                                             style="width:100%;height:170px;object-fit:cover;border-radius:12px;border:1px solid #e2e8f0;">
-                                    </a>
+                                <div class="gallery-item">
+                                    <img src="<?= htmlspecialchars($galleryImage) ?>" alt="Blog gallery image">
                                 </div>
                                 <?php endforeach; ?>
                             </div>
@@ -495,6 +492,35 @@ $seoImage = $cfg('seo_image', '') ?: ($cfg('site_logo', '') ?: 'assets/images/lo
     <script src="../assets/js/navbar.js"></script>
     <script src="../assets/js/animations.js"></script>
     <script src="../assets/js/main.js"></script>
+    <style>
+        .article-gallery-masonry {
+            column-count: 3;
+            column-gap: 16px;
+            margin-top: 14px;
+        }
+        .article-gallery-masonry .gallery-item {
+            break-inside: avoid;
+            margin-bottom: 16px;
+        }
+        .article-gallery-masonry .gallery-item img {
+            display: block;
+            width: 100%;
+            height: auto;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            object-fit: cover;
+        }
+        @media (max-width: 991.98px) {
+            .article-gallery-masonry {
+                column-count: 2;
+            }
+        }
+        @media (max-width: 575.98px) {
+            .article-gallery-masonry {
+                column-count: 1;
+            }
+        }
+    </style>
     <script>
         AOS.init({ duration: 700, once: true, offset: 60 });
 
@@ -539,6 +565,5 @@ $seoImage = $cfg('seo_image', '') ?: ($cfg('site_logo', '') ?: 'assets/images/lo
     </script>
 </body>
 </html>
-
 
 
