@@ -149,10 +149,6 @@ function nt_save_package_itinerary(PDO $pdo, int $packageId, array $post, array 
             $errors[] = 'Each itinerary stop needs a title.';
         }
 
-        if ($description === '') {
-            $errors[] = 'Each itinerary stop needs a description.';
-        }
-
         $itemsToSave[] = [
             'title' => $title,
             'description' => $description,
