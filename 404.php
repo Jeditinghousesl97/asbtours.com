@@ -3,6 +3,10 @@ require_once __DIR__ . '/admin/config/db.php';
 
 http_response_code(404);
 
+$pdo = getPDO();
+$settings = $pdo->query("SELECT `key`, `value` FROM settings")->fetchAll(PDO::FETCH_KEY_PAIR);
+$whatsAppNumber = preg_replace('/\D/', '', (string)($settings['contact_whatsapp'] ?? ''));
+
 $title = 'Page Not Found | ASB Tours Sri Lanka';
 $description = 'The page you are looking for could not be found. Explore ASB Tours Sri Lanka packages, services, blog, and gallery instead.';
 $canonical = absolute_site_url('404.php');
@@ -50,6 +54,25 @@ require_once __DIR__ . '/assets/php/seo.php';
         .btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.9rem 1.3rem; border-radius: 999px; text-decoration: none; font-weight: 600; }
         .btn-primary { background: #0f766e; color: #fff; }
         .btn-secondary { background: #fff; color: #0f172a; border: 1px solid rgba(15, 23, 42, 0.12); }
+        .float-wa {
+            position: fixed;
+            bottom: 24px;
+            left: 24px;
+            z-index: 9999;
+            width: 54px;
+            height: 54px;
+            border-radius: 50%;
+            background: #25D366;
+            color: #fff;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+            font-size: 1.6rem;
+            line-height: 1;
+        }
+        .float-wa:hover { transform: translateY(-2px); }
     </style>
 </head>
 <body>
@@ -64,5 +87,10 @@ require_once __DIR__ . '/assets/php/seo.php';
             </div>
         </section>
     </main>
+    <?php if ($whatsAppNumber !== ''): ?>
+    <a class="float-wa" href="https://wa.me/<?= htmlspecialchars($whatsAppNumber) ?>" target="_blank" rel="noopener" aria-label="Chat on WhatsApp" title="Chat on WhatsApp">
+        <span>W</span>
+    </a>
+    <?php endif; ?>
 </body>
 </html>
