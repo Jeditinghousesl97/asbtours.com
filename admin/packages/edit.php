@@ -7,6 +7,17 @@ require_once __DIR__ . '/../../assets/php/package-itinerary.php';
 $pdo = getPDO();
 $id  = (int)($_GET['id'] ?? 0);
 
+function normalizePackageCategory(string $category): string
+{
+    $key = strtolower(trim($category));
+    $key = str_replace(['_', ' '], '-', $key);
+    if ($key === 'hillcountry' || $key === 'hill-country') return 'hill';
+    if ($key === 'roundtour' || $key === 'round-tours') return 'round-tours';
+    if ($key === 'mostpopular' || $key === 'most-popular') return 'most-popular';
+    if ($key === 'escapetowild' || $key === 'escape-to-wild') return 'escape-to-wild';
+    return $key;
+}
+
 function ensurePackageUploadDir(array &$errors): ?string
 {
     $dir = SITE_ROOT . 'uploads/packages/';
@@ -83,7 +94,8 @@ $itineraryFormItems = nt_package_itinerary_form_items($_POST, array_column($exis
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $title        = trim($_POST['title']        ?? '');
     $slug         = trim($_POST['slug']         ?? '');
-    $category     = $_POST['category']          ?? '';
+    $categoryRaw  = (string)($_POST['category'] ?? '');
+    $category     = normalizePackageCategory($categoryRaw);
     $duration     = trim($_POST['duration']     ?? '');
     $price        = ($_POST['price'] ?? '') !== '' ? $_POST['price'] : null;
     $old_price    = ($_POST['old_price'] ?? '') !== '' ? $_POST['old_price'] : null;
@@ -104,6 +116,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($title === '')    $errors[] = 'Title is required.';
     if ($slug === '')     $errors[] = 'Slug is required.';
     if ($category === '') $errors[] = 'Category is required.';
+    if ($category !== '' && !isset($categories[$category])) {
+        $errors[] = 'Invalid category selected.';
+    }
     if ($duration === '') $errors[] = 'Duration is required.';
     if ($description === '') $errors[] = 'Description is required.';
 
@@ -227,7 +242,7 @@ include __DIR__ . '/../includes/header.php';
               <label class="form-label">Category <span class="text-danger">*</span></label>
               <select name="category" class="form-select" required>
                 <?php foreach ($categories as $cat => $catLabel): ?>
-                  <option value="<?= $cat ?>" <?= $pkg['category'] === $cat ? 'selected' : '' ?>>
+                  <option value="<?= $cat ?>" <?= normalizePackageCategory((string)($pkg['category'] ?? '')) === $cat ? 'selected' : '' ?>>
                     <?= htmlspecialchars($catLabel) ?>
                   </option>
                 <?php endforeach; ?>
