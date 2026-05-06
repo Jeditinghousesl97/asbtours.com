@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 require_once __DIR__ . '/../admin/config/db.php';
 require_once __DIR__ . '/../assets/php/turnstile.php';
 require_once __DIR__ . '/../assets/php/seo.php';
@@ -66,8 +66,8 @@ $badgeLabel = ['popular'=>'Popular','bestseller'=>'Best Seller','new'=>'New',
                'limited'=>'Limited','hotdeal'=>'Hot Deal'];
 
 $total = count($packages);
-$seoTitle = 'Tour Packages | CAGLAF Tours Sri Lanka';
-$seoDesc = 'CAGLAF Tours Sri Lanka Packages, Cultural, Beach, Wildlife, Hill Country & Honeymoon packages. Book your perfect Sri Lanka tour today.';
+$seoTitle = 'Tour Packages | ASB Tours Sri Lanka';
+$seoDesc = 'ASB Tours Sri Lanka Packages, Cultural, Beach, Wildlife, Hill Country & Honeymoon packages. Book your perfect Sri Lanka tour today.';
 $seoCanonical = absolute_site_url('pages/packages.php');
 $seoImage = $cfg('seo_image', '') ?: ($cfg('site_logo', '') ?: 'assets/images/logo.png');
 ?>
@@ -84,7 +84,7 @@ $seoImage = $cfg('seo_image', '') ?: ($cfg('site_logo', '') ?: 'assets/images/lo
         'canonical' => $seoCanonical,
         'image' => $seoImage,
         'type' => 'website',
-        'site_name' => $cfg('site_name', 'CAGLAF Tours'),
+        'site_name' => $cfg('site_name', 'ASB Tours'),
         'structured_data' => [[
             '@context' => 'https://schema.org',
             '@type' => 'CollectionPage',
@@ -384,7 +384,7 @@ $seoImage = $cfg('seo_image', '') ?: ($cfg('site_logo', '') ?: 'assets/images/lo
                         <div class="form-group">
                             <label>Country of Residence</label>
                             <select id="bkgCountry">
-                                <option value="">Select countryâ€¦</option>
+                                <option value="">Select country…</option>
                                 <option>United Kingdom</option><option>United States</option>
                                 <option>Australia</option><option>Germany</option>
                                 <option>France</option><option>Netherlands</option>
@@ -454,7 +454,7 @@ $seoImage = $cfg('seo_image', '') ?: ($cfg('site_logo', '') ?: 'assets/images/lo
     <script>
     AOS.init({ duration: 700, once: true });
 
-    // â”€â”€ Category filter â”€â”€
+    // ── Category filter ──
     function filterPackages(cat) {
         const cards = document.querySelectorAll('.pkg-card-wrap');
         let visible = 0;
@@ -519,7 +519,7 @@ $seoImage = $cfg('seo_image', '') ?: ($cfg('site_logo', '') ?: 'assets/images/lo
         const msgEl = document.getElementById('bkgMsg');
         const turnstileToken = getTurnstileToken(this);
         btn.disabled = true;
-        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sendingâ€¦';
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sending…';
 
         const res = await fetch('<?= htmlspecialchars(site_url('submit-booking.php')) ?>', {
             method: 'POST',
@@ -543,7 +543,7 @@ $seoImage = $cfg('seo_image', '') ?: ($cfg('site_logo', '') ?: 'assets/images/lo
         if (data.success) {
             msgEl.style.background = '#d1fae5';
             msgEl.style.color = '#065f46';
-            msgEl.textContent = 'âœ“ Booking request sent! Our team will contact you within 2 hours.';
+            msgEl.textContent = '✓ Booking request sent! Our team will contact you within 2 hours.';
             this.reset();
             resetTurnstile(this);
             btn.innerHTML = '<i class="fa-solid fa-check"></i> Request Sent!';

@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 require_once __DIR__ . '/../admin/config/db.php';
 require_once __DIR__ . '/../assets/php/package-itinerary.php';
 require_once __DIR__ . '/../assets/php/turnstile.php';
@@ -46,7 +46,7 @@ $badgeClass  = ['popular' => 'badge-popular', 'bestseller' => 'badge-bestseller'
 $difficulty  = ucfirst($pkg['difficulty'] ?? 'Moderate');
 $rating      = $pkg['rating'] ? number_format((float)$pkg['rating'], 1) : null;
 $reviewCount = (int)($pkg['review_count'] ?? 0);
-$seoTitle = $title . ' | CAGLAF Tours Sri Lanka';
+$seoTitle = $title . ' | ASB Tours Sri Lanka';
 $plainDescription = trim(preg_replace('/\s+/', ' ', strip_tags((string)($pkg['description'] ?? ''))) ?? '');
 $seoDesc = $title . ', ' . ($pkg['duration'] ? $pkg['duration'] . ' Sri Lanka tour.' : 'Sri Lanka tour package.') . ($price ? ' From $' . $price . ' per person.' : '');
 $seoCanonical = absolute_site_url('pages/package-detail.php?slug=' . rawurlencode($slug));
@@ -105,7 +105,7 @@ if (!empty($itineraryItems)) {
         'canonical' => $seoCanonical,
         'image' => $seoImage,
         'type' => 'product',
-        'site_name' => $cfg('site_name', 'CAGLAF Tours'),
+        'site_name' => $cfg('site_name', 'ASB Tours'),
         'structured_data' => [[
             '@context' => 'https://schema.org',
             '@type' => 'TouristTrip',
@@ -357,7 +357,7 @@ if (!empty($itineraryItems)) {
                                 </div>
                                 <?php endif; ?>
                             </div>
-                            <div class="sidebar-price-note">Starting price Â· Subject to availability</div>
+                            <div class="sidebar-price-note">Starting price · Subject to availability</div>
                         </div>
                         <div class="sidebar-price-body">
                             <ul class="sidebar-meta-list">
@@ -458,7 +458,7 @@ if (!empty($itineraryItems)) {
                             <span><i class="fa-solid fa-star"></i> <?= $rRat ?><?= $r['review_count'] ? ' (' . $r['review_count'] . ')' : '' ?></span>
                             <?php endif; ?>
                         </div>
-                        <p><?= htmlspecialchars(mb_substr(trim(preg_replace('/\s+/', ' ', strip_tags((string)($r['description'] ?? ''))) ?? ''), 0, 120)) ?>â€¦</p>
+                        <p><?= htmlspecialchars(mb_substr(trim(preg_replace('/\s+/', ' ', strip_tags((string)($r['description'] ?? ''))) ?? ''), 0, 120)) ?>…</p>
                         <a href="package-detail.php?slug=<?= urlencode($r['slug']) ?>" class="related-pkg-link">
                             <i class="fa-solid fa-arrow-right"></i> View Details
                         </a>
@@ -506,7 +506,7 @@ if (!empty($itineraryItems)) {
                             <select name="adults" required>
                                 <option value="">Select</option>
                                 <option value="1">1 Person</option><option value="2">2 People</option><option value="3">3 People</option>
-                                <option value="4">4 People</option><option value="6">5â€“8 People</option><option value="12">9â€“15 People</option>
+                                <option value="4">4 People</option><option value="6">5–8 People</option><option value="12">9–15 People</option>
                             </select>
                         </div>
                     </div>

@@ -255,9 +255,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'to' => [
                         ['email' => $testTo, 'name' => 'SMTP Test Recipient'],
                     ],
-                    'subject' => 'SMTP Test Email from CAGLAF Tours',
-                    'html' => '<h2>SMTP Test Successful</h2><p>This test email was sent from the CAGLAF Tours admin settings page.</p>',
-                    'text' => "SMTP Test Successful\n\nThis test email was sent from the CAGLAF Tours admin settings page.",
+                    'subject' => 'SMTP Test Email from ASB Tours',
+                    'html' => '<h2>SMTP Test Successful</h2><p>This test email was sent from the ASB Tours admin settings page.</p>',
+                    'text' => "SMTP Test Successful\n\nThis test email was sent from the ASB Tours admin settings page.",
                 ]);
 
                 if ($mailResult['success']) {
@@ -553,7 +553,7 @@ include __DIR__ . '/../includes/header.php';
           </div>
           <div class="mb-3">
             <label class="form-label fw-semibold">Site Name</label>
-            <input type="text" name="site_name" class="form-control" value="<?= setting($s,'site_name','CAGLAF Tours') ?>">
+            <input type="text" name="site_name" class="form-control" value="<?= setting($s,'site_name','ASB Tours') ?>">
           </div>
           <div>
             <label class="form-label fw-semibold">Tagline</label>
@@ -575,7 +575,7 @@ include __DIR__ . '/../includes/header.php';
             <div class="col-sm-6">
               <label class="form-label fw-semibold">Email Address</label>
               <div class="input-group"><span class="input-group-text"><i class="bi bi-envelope"></i></span>
-              <input type="email" name="contact_email" class="form-control" value="<?= setting($s,'contact_email') ?>" placeholder="info@caglaftours.com"></div>
+              <input type="email" name="contact_email" class="form-control" value="<?= setting($s,'contact_email') ?>" placeholder="info@asbtours.com"></div>
             </div>
             <div class="col-sm-6">
               <label class="form-label fw-semibold">Phone Number</label>
@@ -664,7 +664,7 @@ include __DIR__ . '/../includes/header.php';
           <div class="theme-preview">
             <div class="theme-preview__hero">
               <span class="theme-preview__badge">Brand Preview</span>
-              <h4><?= htmlspecialchars($s['site_name'] ?? 'CAGLAF Tours') ?></h4>
+              <h4><?= htmlspecialchars($s['site_name'] ?? 'ASB Tours') ?></h4>
               <p>Primary, secondary and dark colours will affect buttons, highlights, sections and overlays across the website.</p>
               <div class="d-flex flex-wrap gap-2">
                 <span class="btn btn-primary btn-sm">Primary Button</span>
@@ -699,7 +699,7 @@ include __DIR__ . '/../includes/header.php';
           <div class="mb-3">
             <label class="form-label fw-semibold">Meta Title</label>
             <input type="text" name="seo_meta_title" id="metaTitleInput" class="form-control" maxlength="70"
-                   value="<?= setting($s,'seo_meta_title') ?>" placeholder="CAGLAF Tours, Sri Lanka Tour Packages">
+                   value="<?= setting($s,'seo_meta_title') ?>" placeholder="ASB Tours, Sri Lanka Tour Packages">
             <div class="d-flex justify-content-between mt-1">
               <div class="form-text">Shown in browser tab &amp; Google results.</div>
               <div class="form-text" id="titleCount">0 / 70</div>
@@ -727,7 +727,7 @@ include __DIR__ . '/../includes/header.php';
         <div class="card-header"><i class="bi bi-google me-2"></i>Google Preview</div>
         <div class="p-4">
           <div class="google-preview">
-            <div class="gp-url">caglaftours.com</div>
+            <div class="gp-url">asbtours.com</div>
             <div class="gp-title" id="gpTitle"><?= setting($s,'seo_meta_title','Page Title') ?></div>
             <div class="gp-desc"  id="gpDesc"><?= setting($s,'seo_meta_desc','Your meta description will appear here...') ?></div>
           </div>
@@ -806,7 +806,7 @@ include __DIR__ . '/../includes/header.php';
               <label class="form-label fw-semibold">SMTP Host</label>
               <input type="text" name="smtp_host" class="form-control"
                      value="<?= setting($s,'smtp_host') ?>"
-                     placeholder="mail.caglaftours.com  or  smtp.gmail.com">
+                     placeholder="mail.asbtours.com  or  smtp.gmail.com">
             </div>
             <div class="col-sm-4">
               <label class="form-label fw-semibold">Port</label>
@@ -818,7 +818,7 @@ include __DIR__ . '/../includes/header.php';
               <label class="form-label fw-semibold">Username</label>
               <input type="text" name="smtp_username" class="form-control"
                      value="<?= setting($s,'smtp_username') ?>"
-                     placeholder="info@caglaftours.com">
+                     placeholder="info@asbtours.com">
             </div>
             <div class="col-sm-6">
               <label class="form-label fw-semibold">Password</label>
@@ -837,13 +837,13 @@ include __DIR__ . '/../includes/header.php';
             <div class="col-sm-4">
               <label class="form-label fw-semibold">From Name</label>
               <input type="text" name="smtp_from_name" class="form-control"
-                     value="<?= setting($s,'smtp_from_name','CAGLAF Tours') ?>">
+                     value="<?= setting($s,'smtp_from_name','ASB Tours') ?>">
             </div>
             <div class="col-sm-4">
               <label class="form-label fw-semibold">From Email</label>
               <input type="email" name="smtp_from_email" class="form-control"
                      value="<?= setting($s,'smtp_from_email') ?>"
-                     placeholder="no-reply@caglaftours.com">
+                     placeholder="no-reply@asbtours.com">
             </div>
             <div class="col-12">
               <label class="form-label fw-semibold">
@@ -852,7 +852,7 @@ include __DIR__ . '/../includes/header.php';
               </label>
               <input type="email" name="smtp_notify_email" class="form-control"
                      value="<?= setting($s,'smtp_notify_email') ?>"
-                     placeholder="owner@caglaftours.com">
+                     placeholder="owner@asbtours.com">
             </div>
           </div>
         </div>

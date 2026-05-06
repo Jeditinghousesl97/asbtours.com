@@ -68,7 +68,7 @@
     // Navbar + Topbar HTML
     function getNavbarHTML() {
         const phone = getSetting('site-phone', '+94 11 234 5678');
-        const email = getSetting('site-email', 'info@caglaftours.com');
+        const email = getSetting('site-email', 'info@asbtours.com');
         const waNum = getSetting('wa-number');
 
         const topbarSocials = [
@@ -99,11 +99,11 @@
 
         <a href="${BASE}index.php" class="nav-logo">
             ${getSetting('site-logo')
-                ? `<img src="${getSetting('site-logo')}" alt="${getSetting('site-name','CAGLAF Tours')}" class="logo-img">`
+                ? `<img src="${getSetting('site-logo')}" alt="${getSetting('site-name','ASB Tours')}" class="logo-img">`
                 : `<div class="logo-icon"><i class="fa-solid fa-compass"></i></div>`
             }
             <div class="logo-text">
-                <span class="logo-name">${getSetting('site-name','CAGLAF Tours')}</span>
+                <span class="logo-name">${getSetting('site-name','ASB Tours')}</span>
                 <span class="logo-tagline">${getSetting('site-tagline','Come as a guest - Leave as a friend.')}</span>
             </div>
         </a>
@@ -137,7 +137,7 @@
     // Footer HTML
     function getFooterHTML() {
         const phone   = getSetting('site-phone',   '+94 11 234 5678');
-        const email   = getSetting('site-email',   'info@caglaftours.com');
+        const email   = getSetting('site-email',   'info@asbtours.com');
         const address = getSetting('site-address', 'No. 15, Galle Road, Colombo 03, Sri Lanka');
         const waNum   = getSetting('wa-number');
 
@@ -168,10 +168,10 @@
             <div class="footer-brand">
                 <div class="footer-logo">
                     ${getSetting('site-logo')
-                        ? `<img src="${getSetting('site-logo')}" alt="${getSetting('site-name','CAGLAF Tours')}" class="logo-img" style="height:38px;max-width:150px;object-fit:contain;">`
+                        ? `<img src="${getSetting('site-logo')}" alt="${getSetting('site-name','ASB Tours')}" class="logo-img" style="height:38px;max-width:150px;object-fit:contain;">`
                         : `<div class="logo-icon"><i class="fa-solid fa-compass"></i></div>`
                     }
-                    <span class="logo-name">${getSetting('site-name','CAGLAF Tours')}</span>
+                    <span class="logo-name">${getSetting('site-name','ASB Tours')}</span>
                 </div>
                 <p>Sri Lanka's passionate travel specialists, crafting unforgettable island experiences from the ancient ruins of Sigiriya to the golden shores of Mirissa. Your Pearl of the Indian Ocean journey begins here.</p>
                 <div class="footer-social">${footerSocials}${tripAdvisorLogo}</div>
@@ -208,7 +208,7 @@
         </div>
 
         <div class="footer-bottom">
-            <p>&copy; <span id="footerYear"></span> CAGLAF Tours. All rights reserved. | Designed &amp; Developed by <a href="https://www.asseminate.com/" target="_blank" rel="noopener">Asseminate</a></p>
+            <p>&copy; <span id="footerYear"></span> ASB Tours. All rights reserved. | Designed &amp; Developed by <a href="https://www.asseminate.com/" target="_blank" rel="noopener">Asseminate</a></p>
             <div class="footer-bottom-links">
                 <a href="${BASE}pages/privacy-policy.php">Privacy Policy</a>
                 <a href="${BASE}pages/terms-of-service.php">Terms of Service</a>
