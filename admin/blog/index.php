@@ -4,17 +4,28 @@ require_once __DIR__ . '/../config/db.php';
 require_once __DIR__ . '/../includes/auth.php';
 
 $pdo = getPDO();
+$hasGalleryImagesColumn = columnExists($pdo, 'blog_posts', 'gallery_images');
 
 // Delete
 if (isset($_GET['delete'])) {
     $id  = (int)$_GET['delete'];
-    $row = $pdo->prepare('SELECT cover_image FROM blog_posts WHERE id = ?');
+    $selectFields = $hasGalleryImagesColumn ? 'cover_image, gallery_images' : 'cover_image';
+    $row = $pdo->prepare("SELECT {$selectFields} FROM blog_posts WHERE id = ?");
     $row->execute([$id]);
     $row = $row->fetch();
     if ($row) {
         if ($row['cover_image']) {
             $f = __DIR__ . '/../../' . $row['cover_image'];
             if (file_exists($f)) unlink($f);
+        }
+        if ($hasGalleryImagesColumn && !empty($row['gallery_images'])) {
+            $gallery = json_decode((string)$row['gallery_images'], true);
+            if (is_array($gallery)) {
+                foreach ($gallery as $img) {
+                    $f = __DIR__ . '/../../' . ltrim((string)$img, '/');
+                    if (file_exists($f)) unlink($f);
+                }
+            }
         }
         $pdo->prepare('DELETE FROM blog_posts WHERE id = ?')->execute([$id]);
     }

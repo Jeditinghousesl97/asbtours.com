@@ -7,6 +7,11 @@ $pdo = getPDO();
 $id  = (int)($_GET['id'] ?? 0);
 $hasAuthorIdColumn = columnExists($pdo, 'blog_posts', 'author_id');
 $hasAuthorColumn   = columnExists($pdo, 'blog_posts', 'author');
+$hasGalleryImagesColumn = columnExists($pdo, 'blog_posts', 'gallery_images');
+if (!$hasGalleryImagesColumn) {
+    $pdo->exec('ALTER TABLE blog_posts ADD COLUMN gallery_images LONGTEXT NULL AFTER cover_image');
+    $hasGalleryImagesColumn = true;
+}
 
 function ensureBlogUploadDir(array &$errors): ?string
 {
@@ -89,6 +94,68 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $cover_image = null;
     }
 
+    // Gallery images
+    $existingGallery = [];
+    if ($hasGalleryImagesColumn && !empty($post['gallery_images'])) {
+        $decoded = json_decode((string)$post['gallery_images'], true);
+        if (is_array($decoded)) {
+            $existingGallery = array_values(array_filter($decoded, fn($v) => is_string($v) && $v !== ''));
+        }
+    }
+    $toRemove = isset($_POST['remove_gallery']) && is_array($_POST['remove_gallery'])
+        ? array_values($_POST['remove_gallery'])
+        : [];
+    if (!empty($toRemove)) {
+        foreach ($toRemove as $imgPath) {
+            $fullPath = SITE_ROOT . ltrim((string)$imgPath, '/');
+            if (file_exists($fullPath)) {
+                unlink($fullPath);
+            }
+        }
+        $existingGallery = array_values(array_filter(
+            $existingGallery,
+            fn($img) => !in_array($img, $toRemove, true)
+        ));
+    }
+
+    if (!empty($_FILES['gallery_images']['name']) && is_array($_FILES['gallery_images']['name'])) {
+        $allowed = ['image/jpeg','image/png','image/webp'];
+        $uploadDir = ensureBlogUploadDir($errors);
+        if ($uploadDir !== null) {
+            foreach ($_FILES['gallery_images']['name'] as $i => $originalName) {
+                if ($originalName === '') {
+                    continue;
+                }
+                $err  = $_FILES['gallery_images']['error'][$i] ?? UPLOAD_ERR_NO_FILE;
+                $type = $_FILES['gallery_images']['type'][$i] ?? '';
+                $size = (int)($_FILES['gallery_images']['size'][$i] ?? 0);
+                $tmp  = $_FILES['gallery_images']['tmp_name'][$i] ?? '';
+
+                if ($err !== UPLOAD_ERR_OK) {
+                    $errors[] = 'One of the gallery images failed to upload. Please try again.';
+                    continue;
+                }
+                if (!in_array($type, $allowed, true)) {
+                    $errors[] = 'Gallery images must be JPG, PNG or WEBP.';
+                    continue;
+                }
+                if ($size > 25 * 1024 * 1024) {
+                    $errors[] = 'Each gallery image must be under 25MB.';
+                    continue;
+                }
+
+                $ext  = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
+                $name = 'blog_gallery_' . time() . '_' . bin2hex(random_bytes(4)) . '.' . $ext;
+                $dest = $uploadDir . $name;
+                if (is_uploaded_file($tmp) && move_uploaded_file($tmp, $dest)) {
+                    $existingGallery[] = 'uploads/blog/' . $name;
+                } else {
+                    $errors[] = 'Failed to upload one gallery image. Check folder permissions.';
+                }
+            }
+        }
+    }
+
     if (empty($errors)) {
         // Set published_at only when first publishing
         $published_at = $post['published_at'];
@@ -100,7 +167,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $sql = '
             UPDATE blog_posts SET
-              title=?, slug=?, excerpt=?, content=?, cover_image=?,
+              title=?, slug=?, excerpt=?, content=?, cover_image=?, ' . ($hasGalleryImagesColumn ? 'gallery_images=?, ' : '') . '
               category=?, tags=?,' . ($hasAuthorIdColumn ? ' author_id=?,' : '') . ($hasAuthorColumn ? ' author=?,' : '') . ' is_published=?, published_at=?
             WHERE id=?
         ';
@@ -111,9 +178,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $excerpt,
             $content,
             $cover_image,
-            $category ?: null,
-            $tags ?: null,
         ];
+        if ($hasGalleryImagesColumn) {
+            $params[] = !empty($existingGallery) ? json_encode($existingGallery, JSON_UNESCAPED_SLASHES) : null;
+        }
+        $params[] = $category ?: null;
+        $params[] = $tags ?: null;
 
         if ($hasAuthorIdColumn) {
             $params[] = (int) $_SESSION['admin_id'];
@@ -257,6 +327,40 @@ include __DIR__ . '/../includes/header.php';
         </div>
       </div>
 
+      <?php
+        $galleryList = [];
+        if (!empty($post['gallery_images'])) {
+            $decoded = json_decode((string)$post['gallery_images'], true);
+            if (is_array($decoded)) {
+                $galleryList = array_values(array_filter($decoded, fn($v) => is_string($v) && $v !== ''));
+            }
+        }
+      ?>
+      <div class="admin-card mb-3">
+        <div class="card-header">Gallery Images</div>
+        <div class="p-3">
+          <?php if (!empty($galleryList)): ?>
+            <div class="row g-2 mb-3">
+              <?php foreach ($galleryList as $img): ?>
+                <div class="col-4">
+                  <img src="<?= htmlspecialchars(site_url($img)) ?>"
+                       style="width:100%;height:80px;object-fit:cover;border-radius:8px;border:1px solid #e2e8f0;">
+                  <div class="form-check mt-1">
+                    <input class="form-check-input" type="checkbox" name="remove_gallery[]"
+                           value="<?= htmlspecialchars($img) ?>" id="rm_<?= md5($img) ?>">
+                    <label class="form-check-label small text-danger" for="rm_<?= md5($img) ?>">Remove</label>
+                  </div>
+                </div>
+              <?php endforeach; ?>
+            </div>
+          <?php endif; ?>
+          <div id="galleryPreviewWrap" class="row g-2 mb-3 d-none"></div>
+          <input type="file" name="gallery_images[]" id="galleryInput"
+                 class="form-control" accept="image/jpeg,image/png,image/webp" multiple>
+          <div class="form-text">Add more gallery images (JPG, PNG, WEBP, up to 25MB each).</div>
+        </div>
+      </div>
+
       <div class="admin-card mb-3">
         <div class="card-header">Meta</div>
         <div class="p-3">
@@ -318,6 +422,27 @@ document.getElementById('imageInput').addEventListener('change', function () {
     r.onload = e => { prev.src = e.target.result; if (wrap) wrap.classList.remove('d-none'); };
     r.readAsDataURL(this.files[0]);
   }
+});
+
+document.getElementById('galleryInput').addEventListener('change', function () {
+  const wrap = document.getElementById('galleryPreviewWrap');
+  wrap.innerHTML = '';
+  if (!this.files || this.files.length === 0) {
+    wrap.classList.add('d-none');
+    return;
+  }
+  wrap.classList.remove('d-none');
+  Array.from(this.files).forEach(file => {
+    const col = document.createElement('div');
+    col.className = 'col-4';
+    const img = document.createElement('img');
+    img.style.cssText = 'width:100%;height:80px;object-fit:cover;border-radius:8px;border:1px solid #e2e8f0;';
+    const reader = new FileReader();
+    reader.onload = e => { img.src = e.target.result; };
+    reader.readAsDataURL(file);
+    col.appendChild(img);
+    wrap.appendChild(col);
+  });
 });
 
 const editor = document.getElementById('editor');

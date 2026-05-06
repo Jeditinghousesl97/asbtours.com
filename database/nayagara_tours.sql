@@ -206,6 +206,7 @@ CREATE TABLE IF NOT EXISTS blog_posts (
   excerpt       TEXT         DEFAULT NULL,
   content       LONGTEXT     NOT NULL,
   cover_image   VARCHAR(300) DEFAULT NULL,
+  gallery_images LONGTEXT    DEFAULT NULL,
   category      VARCHAR(100) DEFAULT NULL,
   tags          VARCHAR(300) DEFAULT NULL,
   author        VARCHAR(150) DEFAULT NULL,

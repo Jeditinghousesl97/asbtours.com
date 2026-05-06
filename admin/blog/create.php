@@ -7,6 +7,11 @@ $pdo    = getPDO();
 $errors = [];
 $hasAuthorIdColumn = columnExists($pdo, 'blog_posts', 'author_id');
 $hasAuthorColumn   = columnExists($pdo, 'blog_posts', 'author');
+$hasGalleryImagesColumn = columnExists($pdo, 'blog_posts', 'gallery_images');
+if (!$hasGalleryImagesColumn) {
+    $pdo->exec('ALTER TABLE blog_posts ADD COLUMN gallery_images LONGTEXT NULL AFTER cover_image');
+    $hasGalleryImagesColumn = true;
+}
 
 function ensureBlogUploadDir(array &$errors): ?string
 {
@@ -71,18 +76,64 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
+    // Gallery images (multiple)
+    $galleryImages = [];
+    if (!empty($_FILES['gallery_images']['name']) && is_array($_FILES['gallery_images']['name'])) {
+        $allowed = ['image/jpeg','image/png','image/webp'];
+        $uploadDir = ensureBlogUploadDir($errors);
+        if ($uploadDir !== null) {
+            foreach ($_FILES['gallery_images']['name'] as $i => $originalName) {
+                if ($originalName === '') {
+                    continue;
+                }
+                $err  = $_FILES['gallery_images']['error'][$i] ?? UPLOAD_ERR_NO_FILE;
+                $type = $_FILES['gallery_images']['type'][$i] ?? '';
+                $size = (int)($_FILES['gallery_images']['size'][$i] ?? 0);
+                $tmp  = $_FILES['gallery_images']['tmp_name'][$i] ?? '';
+
+                if ($err !== UPLOAD_ERR_OK) {
+                    $errors[] = 'One of the gallery images failed to upload. Please try again.';
+                    continue;
+                }
+                if (!in_array($type, $allowed, true)) {
+                    $errors[] = 'Gallery images must be JPG, PNG or WEBP.';
+                    continue;
+                }
+                if ($size > 25 * 1024 * 1024) {
+                    $errors[] = 'Each gallery image must be under 25MB.';
+                    continue;
+                }
+
+                $ext  = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
+                $name = 'blog_gallery_' . time() . '_' . bin2hex(random_bytes(4)) . '.' . $ext;
+                $dest = $uploadDir . $name;
+                if (is_uploaded_file($tmp) && move_uploaded_file($tmp, $dest)) {
+                    $galleryImages[] = 'uploads/blog/' . $name;
+                } else {
+                    $errors[] = 'Failed to upload one gallery image. Check folder permissions.';
+                }
+            }
+        }
+    }
+
     if (empty($errors)) {
         $published_at = $is_published ? date('Y-m-d H:i:s') : null;
-        $columns = ['title', 'slug', 'excerpt', 'content', 'cover_image', 'category', 'tags'];
+        $columns = ['title', 'slug', 'excerpt', 'content', 'cover_image'];
         $values = [
             $title,
             $slug,
             $excerpt,
             $content,
             $cover_image,
-            $category ?: null,
-            $tags ?: null,
         ];
+        if ($hasGalleryImagesColumn) {
+            $columns[] = 'gallery_images';
+            $values[] = !empty($galleryImages) ? json_encode($galleryImages, JSON_UNESCAPED_SLASHES) : null;
+        }
+        $columns[] = 'category';
+        $columns[] = 'tags';
+        $values[] = $category ?: null;
+        $values[] = $tags ?: null;
 
         if ($hasAuthorIdColumn) {
             $columns[] = 'author_id';
@@ -232,6 +283,16 @@ include __DIR__ . '/../includes/header.php';
         </div>
       </div>
 
+      <div class="admin-card mb-3">
+        <div class="card-header">Gallery Images</div>
+        <div class="p-3">
+          <div id="galleryPreviewWrap" class="row g-2 mb-3 d-none"></div>
+          <input type="file" name="gallery_images[]" id="galleryInput"
+                 class="form-control" accept="image/jpeg,image/png,image/webp" multiple>
+          <div class="form-text">Upload multiple JPG, PNG, or WEBP images (max 25MB each).</div>
+        </div>
+      </div>
+
       <!-- Meta -->
       <div class="admin-card mb-3">
         <div class="card-header">Meta</div>
@@ -340,6 +401,28 @@ document.getElementById('imageInput').addEventListener('change', function () {
     r.onload = e => { prev.src = e.target.result; wrap.classList.remove('d-none'); };
     r.readAsDataURL(this.files[0]);
   }
+});
+
+// Gallery previews
+document.getElementById('galleryInput').addEventListener('change', function () {
+  const wrap = document.getElementById('galleryPreviewWrap');
+  wrap.innerHTML = '';
+  if (!this.files || this.files.length === 0) {
+    wrap.classList.add('d-none');
+    return;
+  }
+  wrap.classList.remove('d-none');
+  Array.from(this.files).forEach(file => {
+    const col = document.createElement('div');
+    col.className = 'col-4';
+    const img = document.createElement('img');
+    img.style.cssText = 'width:100%;height:80px;object-fit:cover;border-radius:8px;border:1px solid #e2e8f0;';
+    const reader = new FileReader();
+    reader.onload = e => { img.src = e.target.result; };
+    reader.readAsDataURL(file);
+    col.appendChild(img);
+    wrap.appendChild(col);
+  });
 });
 
 // Editor: sync content to hidden textarea on submit

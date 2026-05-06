@@ -61,6 +61,17 @@ if (!$useStatic) {
     $pubDate   = $post['published_at'] ? date('F j, Y', strtotime($post['published_at'])) : '';
     $pCat      = $catConfig[$post['category'] ?? ''] ?? ['icon' => 'fa-tag', 'label' => 'General', 'css' => 'cat-tips'];
     $heroImg   = $post['cover_image'] ? site_url($post['cover_image']) : 'assets/images/destinations/sigiriya.jpg';
+    $postGallery = [];
+    if (!empty($post['gallery_images'])) {
+        $decodedGallery = json_decode((string)$post['gallery_images'], true);
+        if (is_array($decodedGallery)) {
+            foreach ($decodedGallery as $imgPath) {
+                if (is_string($imgPath) && $imgPath !== '') {
+                    $postGallery[] = site_url($imgPath);
+                }
+            }
+        }
+    }
     $pageTitle = htmlspecialchars($post['title']) . ' | ASB Tours Blog';
     $metaDesc  = htmlspecialchars($post['excerpt'] ?? substr(strip_tags($post['content'] ?? ''), 0, 160));
 
@@ -94,6 +105,7 @@ if (!$useStatic) {
         ['id'=>'section-8','text'=>'Packing List',      'num'=>8],
     ];
     $relatedPosts = [];
+    $postGallery = [];
 }
 $seoCanonical = $useStatic
     ? absolute_site_url('pages/blog-detail.php')
@@ -285,6 +297,22 @@ $seoImage = $cfg('seo_image', '') ?: ($cfg('site_logo', '') ?: 'assets/images/lo
 <?php else: ?>
                         <?= $content ?>
 <?php endif; ?>
+
+                        <?php if (!$useStatic && !empty($postGallery)): ?>
+                        <div class="article-gallery-wrap">
+                            <h3 style="margin-top:2rem;">Photo Gallery</h3>
+                            <div class="row g-3">
+                                <?php foreach ($postGallery as $galleryImage): ?>
+                                <div class="col-6 col-md-4">
+                                    <a href="<?= htmlspecialchars($galleryImage) ?>" target="_blank" rel="noopener">
+                                        <img src="<?= htmlspecialchars($galleryImage) ?>" alt="Blog gallery image"
+                                             style="width:100%;height:170px;object-fit:cover;border-radius:12px;border:1px solid #e2e8f0;">
+                                    </a>
+                                </div>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+                        <?php endif; ?>
 
                         <!-- Share Bar -->
                         <div class="article-share-bar">
@@ -511,7 +539,6 @@ $seoImage = $cfg('seo_image', '') ?: ($cfg('site_logo', '') ?: 'assets/images/lo
     </script>
 </body>
 </html>
-
 
 
 
