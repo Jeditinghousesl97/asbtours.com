@@ -5,6 +5,25 @@ require_once __DIR__ . '/../includes/auth.php';
 
 $pdo = getPDO();
 
+function normalizePackageCategory(string $category): string
+{
+    $key = strtolower(trim($category));
+    $key = str_replace(['_', ' '], '-', $key);
+    if ($key === 'hillcountry' || $key === 'hill-country') {
+        return 'hill';
+    }
+    if ($key === 'roundtour' || $key === 'round-tours') {
+        return 'round-tours';
+    }
+    if ($key === 'mostpopular' || $key === 'most-popular') {
+        return 'most-popular';
+    }
+    if ($key === 'escapetowild' || $key === 'escape-to-wild') {
+        return 'escape-to-wild';
+    }
+    return $key;
+}
+
 // Toggle active
 if (isset($_GET['toggle_active'])) {
     $id  = (int)$_GET['toggle_active'];
@@ -57,6 +76,20 @@ $categories = [
     'most-popular' => 'Most Popular',
     'escape-to-wild' => 'Escape to Wild',
 ];
+
+function packageCategoryLabel(?string $rawCategory, array $categories): string
+{
+    $raw = trim((string)$rawCategory);
+    if ($raw === '') {
+        return 'Uncategorized';
+    }
+    $normalized = normalizePackageCategory($raw);
+    if (isset($categories[$normalized])) {
+        return $categories[$normalized];
+    }
+    $pretty = str_replace(['-', '_'], ' ', $raw);
+    return ucwords($pretty);
+}
 
 $pageTitle = 'Packages';
 include __DIR__ . '/../includes/header.php';
@@ -152,7 +185,7 @@ include __DIR__ . '/../includes/header.php';
               </td>
               <td>
                 <span class="badge rounded-pill" style="background:#e0f4fc;color:#0077B6;">
-                  <?= htmlspecialchars($categories[$pkg['category']] ?? ucfirst($pkg['category'])) ?>
+                  <?= htmlspecialchars(packageCategoryLabel($pkg['category'] ?? '', $categories)) ?>
                 </span>
               </td>
               <td><?= htmlspecialchars($pkg['duration']) ?></td>

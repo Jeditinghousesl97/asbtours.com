@@ -60,12 +60,43 @@ $catFilter= [
     'escape-to-wild'=>'escape-to-wild',
 ];
 
+function normalizePackageCategory(string $category): string
+{
+    $key = strtolower(trim($category));
+    $key = str_replace(['_', ' '], '-', $key);
+    if ($key === 'hillcountry' || $key === 'hill-country') {
+        return 'hill';
+    }
+    if ($key === 'roundtour' || $key === 'round-tours') {
+        return 'round-tours';
+    }
+    if ($key === 'mostpopular' || $key === 'most-popular') {
+        return 'most-popular';
+    }
+    if ($key === 'escapetowild' || $key === 'escape-to-wild') {
+        return 'escape-to-wild';
+    }
+    return $key;
+}
+
 $badgeClass = ['popular'=>'badge-popular','bestseller'=>'badge-bestseller','new'=>'badge-new',
                'limited'=>'badge-featured','hotdeal'=>'badge-popular'];
 $badgeLabel = ['popular'=>'Popular','bestseller'=>'Best Seller','new'=>'New',
                'limited'=>'Limited','hotdeal'=>'Hot Deal'];
 
 $total = count($packages);
+$categoryCounts = [];
+foreach ($packages as $p) {
+    $rawCat = (string)($p['category'] ?? '');
+    if ($rawCat === '') {
+        continue;
+    }
+    $normalized = normalizePackageCategory($rawCat);
+    if (!isset($catLabel[$normalized])) {
+        continue;
+    }
+    $categoryCounts[$normalized] = ($categoryCounts[$normalized] ?? 0) + 1;
+}
 $seoTitle = 'Tour Packages | ASB Tours Sri Lanka';
 $seoDesc = 'ASB Tours Sri Lanka Packages, Cultural, Beach, Wildlife, Hill Country & Honeymoon packages. Book your perfect Sri Lanka tour today.';
 $seoCanonical = absolute_site_url('pages/packages.php');
@@ -166,6 +197,9 @@ $seoImage = $cfg('seo_image', '') ?: ($cfg('site_logo', '') ?: 'assets/images/lo
                     'escape-to-wild'=>'Escape to Wild',
                 ];
                 foreach ($filterMap as $cat):
+                    if (($categoryCounts[$cat] ?? 0) < 1) {
+                        continue;
+                    }
                     $fc = $catFilter[$cat] ?? $cat;
                 ?>
                 <button class="filter-btn" data-filter="<?= $fc ?>">
@@ -192,7 +226,7 @@ $seoImage = $cfg('seo_image', '') ?: ($cfg('site_logo', '') ?: 'assets/images/lo
                     $hasPrice = $p['price'] !== null && $p['price'] !== '';
                     $price   = $hasPrice ? number_format((float)$p['price'], 0) : null;
                     $oldPrice= ($p['old_price'] !== null && $p['old_price'] !== '') ? number_format((float)$p['old_price'], 0) : null;
-                    $cat     = $p['category'];
+                    $cat     = normalizePackageCategory((string)$p['category']);
                     $fc      = $catFilter[$cat] ?? $cat;
                     $badge   = $p['badge'] ?? '';
                     $rating  = $p['rating']  ? number_format((float)$p['rating'],  1) : null;
@@ -560,7 +594,6 @@ $seoImage = $cfg('seo_image', '') ?: ($cfg('site_logo', '') ?: 'assets/images/lo
 
 </body>
 </html>
-
 
 
 
