@@ -53,6 +53,37 @@ function ensurePackagePriceColumnAllowsNull(PDO $pdo, array &$errors): bool
     return true;
 }
 
+function ensurePackageCategoryEnum(PDO $pdo, array &$errors): bool
+{
+    $allowedCategories = [
+        'cultural', 'beach', 'wildlife', 'hill', 'honeymoon', 'adventure',
+        'sightseeing', 'leisure', 'round-tours', 'most-popular', 'escape-to-wild',
+    ];
+
+    try {
+        $column = $pdo->query("SHOW COLUMNS FROM packages LIKE 'category'")->fetch(PDO::FETCH_ASSOC);
+        $type = strtolower((string)($column['Type'] ?? ''));
+        $isEnum = str_starts_with($type, 'enum(');
+        $isMissingAny = false;
+        foreach ($allowedCategories as $cat) {
+            if (strpos($type, "'" . strtolower($cat) . "'") === false) {
+                $isMissingAny = true;
+                break;
+            }
+        }
+
+        if (!$isEnum || $isMissingAny) {
+            $enumSql = "ENUM('" . implode("','", $allowedCategories) . "')";
+            $pdo->exec("ALTER TABLE packages MODIFY category {$enumSql} NOT NULL");
+        }
+    } catch (Throwable $e) {
+        $errors[] = 'Package category schema is out of date. Please update the packages.category column.';
+        return false;
+    }
+
+    return true;
+}
+
 function sanitizePackageDescriptionHtml(string $html): string
 {
     // Remove executable/style blocks first.
@@ -167,7 +198,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $cover_image = null;
     }
 
-    if (empty($errors) && ensurePackagePriceColumnAllowsNull($pdo, $errors)) {
+    if (empty($errors) && ensurePackageCategoryEnum($pdo, $errors) && ensurePackagePriceColumnAllowsNull($pdo, $errors)) {
         $stmt = $pdo->prepare('
             UPDATE packages SET
               title=?, slug=?, category=?, duration=?, price=?, old_price=?,
